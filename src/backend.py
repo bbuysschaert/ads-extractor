@@ -2,7 +2,7 @@ import extractors as E
 import parsers as P
 import loaders as L
 
-def lookup_paper(_bibcode:str, _apitoken:str, **kwargs):
+def lookup_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
     """
     Get all information for the paper specified by the bibcode and parse the information
     """
@@ -20,18 +20,22 @@ def lookup_paper(_bibcode:str, _apitoken:str, **kwargs):
     _infos = P.enrich_paperinfo_abstract(_infos, _abs)
 
     # Only have one paper here
-    _infos = _infos[0]
+    _info = _infos[0]
 
     # Parse individual information keys
-    _infos['authors'] = P.parse_authorlist([_infos['authors']])
-    _infos['keywords'] = P.parse_keywordlist([_infos['keywords']])
+    _info['authors'] = P.parse_authorlist([_info['authors']])
+    _info['keywords'] = P.parse_keywordlist([_info['keywords']])
     
     # Combine all information
-    _infos['citations'] = _cits
-    _infos['references'] = _refs
-    return _infos
+    _info['citations'] = _cits
+    _info['references'] = _refs
 
-def follow_papers(_bibcode:str, _apitoken:str, _levels=0, **kwargs):
+    # Write out the data to a file
+    L.write_data(_info, _path=_path)
+
+    return _info
+
+def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) -> list:
     """
     Perform an iterative lookup and extraction starting from _bibcode.
     Will fetch a result for all citations and references and this for the specified number of _levels.
@@ -56,11 +60,11 @@ def follow_papers(_bibcode:str, _apitoken:str, _levels=0, **kwargs):
             _temp = []
 
             for cc in _cits:
-                _temp.append(lookup_paper(cc, _apitoken))
+                _temp.append(lookup_paper(cc, _apitoken, _path=_path))
             for rr in _refs:
-                _temp.append(lookup_paper(rr, _apitoken))
+                _temp.append(lookup_paper(rr, _apitoken, _path=_path))
 
-            # Get all citations and references out
+            # Get all citations and references out for the next level
             _cits = [cc for tt in _temp for cc in tt['citations']]
             _refs = [rr for tt in _temp for rr in tt['references']]
 
