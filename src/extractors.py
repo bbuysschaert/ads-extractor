@@ -107,9 +107,7 @@ def get_abstract_papers(_bibcodes:list, _apitoken:str, **kwargs) -> dict:
     Get the abstract for a list of papers (Export formats: https://ui.adsabs.harvard.edu/help/actions/export)
     
     Returns a dict with the abstract per bibcode
-    """
-    import re
-    
+    """    
     # Define custom format
     _format = "%R,%B|||" # Bibcode &  Abstract
     
@@ -125,8 +123,19 @@ def get_abstract_papers(_bibcodes:list, _apitoken:str, **kwargs) -> dict:
     # Parse the exports
     _temp = _results.json()['export'].split('|||')[:-1] # Do not take last blank element
     _temp = [pp.strip() for pp in _temp]
-    #_temp = [re.search('^(.*?)\,(.*?)$', ss) for ss in _temp]
+    # Everything before first comma is the bibcode
+    _temp = [pp.split(',') for pp in _temp]
+    _temp = {pp[0]:','.join(pp[1:]) for pp in _temp}
+    
+    # Clean up empty abstracts (will have a \n in bibcode key)
+    _dupkeys = [key for key in _temp.keys() if '\n' in key]
+    for dd in _dupkeys:
+        _tempkeys = dd.split('\n')
+        # Add blank abstracts
+        for tt in _tempkeys:
+            _temp[tt] = ''
+        # Copy the abstract of dd to the last key in the _tempkeys
+        _temp[_tempkeys[-1]] == _temp[dd]
+        _temp.pop(dd)
     
     return _temp
-    #return {ss.group(1):ss.group(2) for ss in _temp}
-    
