@@ -42,7 +42,7 @@ def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) 
 
     Will only look at the paper itself with _levels=0
     """
-    _info = lookup_paper(_bibcode, _apitoken)
+    _info = lookup_paper(_bibcode, _apitoken, _path=_path)
     _infos = [_info]
 
     # Look at the paper itself
