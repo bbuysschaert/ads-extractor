@@ -1,4 +1,5 @@
 import streamlit as st
+import backend as app
 
 def header():
     """
@@ -18,13 +19,16 @@ def main():
     _token = st.sidebar.text_input('ADS API token', '')
     _bibcode = st.sidebar.text_input('Starting bibcode', '')
     _outputpath = st.sidebar.text_input('Output folder', '')
-    _level = st.sidebar.selectbox('Level', [1,2,3])
+    _levels = st.sidebar.selectbox('Levels', [0,1,2])
 
     # Start extracting
     if st.button('Start extracting'):
         with st.spinner('Starting extracting now -- Please wait'):
-            from time import sleep
-            sleep(5)
+            app.follow_papers(_bibcode=_bibcode,
+                              _apitoken=_token, 
+                              _path=_outputpath,
+                              _levels=_levels
+            )
 
 if __name__ == '__main__':
     main()
