@@ -60,9 +60,15 @@ def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) 
             _temp = []
 
             for cc in _cits:
-                _temp.append(lookup_paper(cc, _apitoken, _path=_path))
+                try:
+                    _temp.append(lookup_paper(cc, _apitoken, _path=_path))
+                except:
+                    L.write_error(cc, _path=_path)
             for rr in _refs:
-                _temp.append(lookup_paper(rr, _apitoken, _path=_path))
+                try:
+                    _temp.append(lookup_paper(rr, _apitoken, _path=_path))
+                except:
+                    L.write_error(rr, _path=_path)
 
             # Get all citations and references out for the next level
             _cits = [cc for tt in _temp for cc in tt['citations']]
