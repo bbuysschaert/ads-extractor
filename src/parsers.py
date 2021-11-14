@@ -15,7 +15,7 @@ def parse_info_papers(_bibtexs:str, **kwargs) -> list:
     
     return _result[:-1] # Do not take last blank element
 
-def paperinfo_list2dict(_bibtexl: list, **kwargs) -> list:
+def paperinfo_list2dict(_bibtexl: list(list), **kwargs) -> list(dict):
     """
     Convert the bibtex list of lists (of format %l;%Y;%j;%J;%V;%p;%q;%K;%pp;%pc;%R;%S;%T;%u) to a list of dicts
     """
@@ -58,7 +58,7 @@ def parse_keywordlist(_keywords:str, **kwargs) -> list:
     
     return _result
 
-def enrich_paperinfo_abstract(_paperinfos:list, _abstracts:dict) -> dict:
+def enrich_paperinfo_abstract(_paperinfos:list(dict), _abstracts:dict) -> list(dict):
     """
     Enrich the list of information on the papers with their abstracts.  The matching happens on bibcode.
     """
