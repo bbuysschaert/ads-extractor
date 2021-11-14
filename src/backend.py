@@ -2,7 +2,7 @@ import extractors as E
 import parsers as P
 import loaders as L
 
-def lookup_paper(_bibcode:str, _apitoken:str):
+def lookup_paper(_bibcode:str, _apitoken:str, **kwargs):
     """
     Get all information for the paper specified by the bibcode and parse the information
     """
@@ -29,11 +29,45 @@ def lookup_paper(_bibcode:str, _apitoken:str):
     # Combine all information
     _infos['citations'] = _cits
     _infos['references'] = _refs
-
     return _infos
 
+def follow_papers(_bibcode:str, _apitoken:str, _levels=0, **kwargs):
+    """
+    Perform an iterative lookup and extraction starting from _bibcode.
+    Will fetch a result for all citations and references and this for the specified number of _levels.
 
+    Will only look at the paper itself with _levels=0
+    """
+    _info = lookup_paper(_bibcode, _apitoken)
+    _infos = [_info]
 
+    # Look at the paper itself
+    if _levels == 0:
+        return _infos
+    
+    elif _levels > 0:
+        # Extract the citations and references
+        _cits = _info['citations']
+        _refs = _info['references']
+
+        # Start building iteratively
+        for ll in range(_levels):
+            # Blank list for appending
+            _temp = []
+
+            for cc in _cits:
+                _temp.append(lookup_paper(cc, _apitoken))
+            for rr in _refs:
+                _temp.append(lookup_paper(rr, _apitoken))
+
+            # Get all citations and references out
+            _cits = [cc for tt in _temp for cc in tt['citations']]
+            _refs = [rr for tt in _temp for rr in tt['references']]
+
+            # Append to the _infos object
+            _infos += _temp
+            
+    return _infos
 
 
 
