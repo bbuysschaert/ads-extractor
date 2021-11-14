@@ -38,6 +38,8 @@ def lookup_paper(_bibcode:str, _apitoken:str):
 
 
 
+
+
 if __name__ == '__main__':
     token = ''
     bibcode = '2019A&A...622A..67B'
