@@ -9,3 +9,6 @@ Extract info on papers from ADS to prepare a dataset for a graph database
 - forward author list to extractors
 - check whether citations and bibinfo exists
 - split bibinfo from citations
+- include dependencies
+- check whether HTML documentation is an option
+- perform parallelism 
