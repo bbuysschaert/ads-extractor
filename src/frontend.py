@@ -1,6 +1,8 @@
 import streamlit as st
 import backend as app
 
+import os
+
 def header():
     """
     """
@@ -23,7 +25,14 @@ def main():
 
     # Start extracting
     if st.button('Start extracting'):
-        with st.spinner('Starting extracting now -- Please wait'):
+        with st.spinner('Starting extraction now-- Please wait'):
+            # Make some sanity checks
+            assert _token != '', 'Please provide a valid API token'
+            assert _bibcode != '', 'Please provide a valid bibcode ID'
+            assert _outputpath != '', 'Please provide a valid outputpath'
+            assert os.path.exists(_outputpath), 'Please provide a valid outputpath'
+
+            # Run the application
             app.follow_papers(_bibcode=_bibcode,
                               _apitoken=_token, 
                               _path=_outputpath,

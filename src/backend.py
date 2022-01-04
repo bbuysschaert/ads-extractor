@@ -1,10 +1,14 @@
+import os
+
 import extractors as E
 import parsers as P
 import loaders as L
+import helpers as H
 
-def lookup_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
+def retrieve_paper_from_ADS(_bibcode:str, _apitoken:str, **kwargs) -> dict:
     """
-    Get all information for the paper specified by the bibcode and parse the information
+    Get all the information for the paper specified by the bibcode from ADS.
+    The information is subsequently parsed and returned as a dictionnary.
     """
     # Extract the info from ADS
     _refs = E.get_references_paper(_bibcode, _apitoken)
@@ -20,6 +24,7 @@ def lookup_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
     _infos = P.enrich_paperinfo_abstract(_infos, _abs)
 
     # Only have one paper here
+    assert len(_infos) == 1, f'Got more papers out than expected for bibcode {_bibcode}'
     _info = _infos[0]
 
     # Parse individual information keys
@@ -29,9 +34,42 @@ def lookup_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
     # Combine all information
     _info['citations'] = _cits
     _info['references'] = _refs
+    return _info
 
-    # Write out the data to a file
-    L.write_data(_info, _path=_path)
+def retrieve_paper_from_file(_bibcode:str, _path='./', **kwargs) -> dict:
+    """
+    Get all the information for the paper specified by the bibcode from a file.  It is expected that this file was created during an earlier run.
+
+    Returns the paper information as a dictionnary object.
+    """
+    # Build the filename
+    _filename = H.build_filename_data(_bibcode)
+    _filename = os.path.join(_path, _filename)
+    _info = L.read_data(_filename, **kwargs)
+    return _info
+
+def retrieve_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
+    """
+    Get all the information for the paper specified by the bibcode.  
+    The function will first check if the information exists at the path.
+    If it does, it will retrieve the information from the file.
+    If not, it will retrieve the information from ADS and store it to a file.
+    
+    Returns the paper information as a dictionnary object.
+    """
+    # Build the filename to check it
+    _filename = H.build_filename_data(_bibcode)
+    _filename = os.path.join(_path, _filename)
+
+    if (H.check_if_dir_exists(_path)) & (H.check_if_file_exists(_filename)):
+        # Retrieve the information from file
+        _info = retrieve_paper_from_file()
+    else:
+        # Retrieve the information from ADS
+        _info = retrieve_paper_from_ADS(_bibcode, _apitoken, **kwargs)
+        
+        # Write out the information to a file
+        L.write_data(_info, _path=_path)
 
     return _info
 
@@ -42,7 +80,7 @@ def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) 
 
     Will only look at the paper itself with _levels=0
     """
-    _info = lookup_paper(_bibcode, _apitoken, _path=_path)
+    _info = retrieve_paper(_bibcode, _apitoken, _path=_path)
     _infos = [_info]
 
     # Look at the paper itself
@@ -61,12 +99,12 @@ def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) 
 
             for cc in _cits:
                 try:
-                    _temp.append(lookup_paper(cc, _apitoken, _path=_path))
+                    _temp.append(retrieve_paper(cc, _apitoken, _path=_path))
                 except:
                     L.write_error(cc, _path=_path)
             for rr in _refs:
                 try:
-                    _temp.append(lookup_paper(rr, _apitoken, _path=_path))
+                    _temp.append(retrieve_paper(rr, _apitoken, _path=_path))
                 except:
                     L.write_error(rr, _path=_path)
 
