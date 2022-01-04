@@ -28,8 +28,8 @@ def retrieve_paper_from_ADS(_bibcode:str, _apitoken:str, **kwargs) -> dict:
     _info = _infos[0]
 
     # Parse individual information keys
-    _info['authors'] = P.parse_authorlist([_info['authors']])
-    _info['keywords'] = P.parse_keywordlist([_info['keywords']])
+    _info['authors'] = P.parse_authorlist(_info['authors'])
+    _info['keywords'] = P.parse_keywordlist(_info['keywords'])
     
     # Combine all information
     _info['citations'] = _cits
@@ -66,14 +66,17 @@ def retrieve_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
         _info = retrieve_paper_from_file(_bibcode, _path, **kwargs)
     else:
         # Retrieve the information from ADS
-        _info = retrieve_paper_from_ADS(_bibcode, _apitoken, **kwargs)
-        
-        # Write out the information to a file
-        L.write_data(_info, _path=_path)
+        try:
+            _info = retrieve_paper_from_ADS(_bibcode, _apitoken, **kwargs)
+            
+            # Write out the information to a file
+            L.write_data(_info, _path=_path)
+        except:
+            L.write_error(_bibcode, _path=_path)
 
     return _info
 
-def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) -> list:
+def follow_papers_old(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) -> list:
     """
     Perform an iterative lookup and extraction starting from _bibcode.
     Will fetch a result for all citations and references and this for the specified number of _levels.
@@ -99,12 +102,12 @@ def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) 
 
             for cc in _cits:
                 try:
-                    _temp.append(retrieve_paper(cc, _apitoken, _path=_path))
+                    _temp.append(retrieve_paper(cc, _apitoken, _path=_path)) # Should actually have levels here?
                 except:
                     L.write_error(cc, _path=_path)
             for rr in _refs:
                 try:
-                    _temp.append(retrieve_paper(rr, _apitoken, _path=_path))
+                    _temp.append(retrieve_paper(rr, _apitoken, _path=_path)) # Should actually have levels here?
                 except:
                     L.write_error(rr, _path=_path)
 
@@ -117,13 +120,52 @@ def follow_papers(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) 
             
     return _infos
 
+def follow_papers(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> list:
+    """
+    Perform an iterative lookup and extraction starting from _bibcode.
+    Will fetch a result for all citations and references and this for the specified number of _levels.
+
+    Will only look at the paper itself with _levels=0
+    """
+    # Get the information for specified paper
+    _info = retrieve_paper(_bibcode, _apitoken, _path=_path, **kwargs)
+    _infos = [_info]
+
+    _temp = []
+    # Check which information to follow
+    _follow_citations = True
+    _follow_references = True
+    _follow_authors = True
+    if _follow_citations:
+        _temp += _info['citations']
+    if _follow_references:
+        _temp += _info['references']
+    if _follow_authors:
+        _authors = _info['authors']
+        for aa in _authors:
+            _temp += E.get_bibcodes_author(aa, _apitoken, **kwargs)
+    
+    # Determine uniqueness
+    _temp = list(set(_temp))
+    
+    # Loop througfh the different papers
+    # Should be multithreaded through a worker pool
+    for pp in _temp:
+        print(pp)
+        _infos += retrieve_paper(pp, _apitoken, _path=_path, **kwargs)
+        
+    # Repeat similarly as the levels in the "old" code?
+
+    return _infos
 
 
 
 
 
 if __name__ == '__main__':
+    path = 'C:\\Users\\bramb\\Desktop\\ads-extractor\\bibcodes'
     token = ''
     bibcode = '2019A&A...622A..67B'
+    _infos = follow_papers(bibcode, token, path, reloadfiles=True)
 
 

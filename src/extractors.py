@@ -139,3 +139,18 @@ def get_abstract_papers(_bibcodes:list, _apitoken:str, **kwargs) -> dict:
         _temp.pop(dd)
     
     return _temp
+
+def get_bibcodes_author(_author:str, _apitoken:str, **kwargs) -> list:
+    """
+    Make an API call to retrieve a list of papers where the specific author has appeared on..
+    
+    Returns a list of bibcodes
+    """
+    _query = 'author:{}'.format(_author)
+    _equery = urlencode({'q': _query, 'fl': 'bibcode'})
+    
+    _header = {'Authorization': 'Bearer ' + _apitoken}
+    
+    # Make the API call(s)
+    _bibs = make_searchcalls(_equery, _header)
+    return [dd['bibcode'] for dd in _bibs]

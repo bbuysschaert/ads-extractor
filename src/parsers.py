@@ -48,6 +48,7 @@ def parse_authorlist(_authorlist:str, **kwargs) -> list:
         
         return _result
     except:
+        print('Failed to parse author list')
         return _authorlist
 
 def parse_keywordlist(_keywords:str, **kwargs) -> list:
@@ -62,6 +63,7 @@ def parse_keywordlist(_keywords:str, **kwargs) -> list:
         
         return _result
     except:
+        print('Failed to parse keyword list')
         return _keywords
 
 def enrich_paperinfo_abstract(_paperinfos:list, _abstracts:dict) -> list:

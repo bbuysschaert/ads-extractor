@@ -55,7 +55,7 @@ def write_error(_bibcode:str, _path='./', **kwargs):
     """
     Write the bibcode to a separate file to trace which bibcodes could not be searched and parsed
     """
-    _filename = _bibcode + '.json'
+    _filename = _bibcode + '_error.json'
     _info = {'bibcode':_bibcode}
     with open(os.path.join(_path, 'logs', _filename), 'w') as _out:
         json.dump(_info,
