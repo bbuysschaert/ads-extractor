@@ -25,7 +25,7 @@ def main():
 
     # Start extracting
     if st.button('Start extracting'):
-        with st.spinner('Starting extracting now -- Please wait'):
+        with st.spinner('Starting extraction now-- Please wait'):
             # Make some sanity checks
             assert _token != '', 'Please provide a valid API token'
             assert _bibcode != '', 'Please provide a valid bibcode ID'
