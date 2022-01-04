@@ -1,4 +1,5 @@
 import os
+from typing import DefaultDict
 
 import extractors as E
 import parsers as P
@@ -165,7 +166,9 @@ def follow_paper(_bibcode:str, _apitoken:str, _path='./', _nlevels=0, **kwargs) 
         _infos += _level
         
     # Ensure no duplicate information is passed above
-    # _infos = list(set(_infos)) will not work
+    # Note that dicts are not hashable, but tuples are!
+    # https://stackoverflow.com/questions/9427163/remove-duplicate-dict-in-list-in-python
+    _infos = [dict(tt) for tt in {tuple(DefaultDict.items()) for dd in _infos}]
     
     return _infos
 
