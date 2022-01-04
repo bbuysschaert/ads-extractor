@@ -63,7 +63,7 @@ def retrieve_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
 
     if (H.check_if_dir_exists(_path)) & (H.check_if_file_exists(_filename)):
         # Retrieve the information from file
-        _info = retrieve_paper_from_file()
+        _info = retrieve_paper_from_file(_bibcode, _path, **kwargs)
     else:
         # Retrieve the information from ADS
         _info = retrieve_paper_from_ADS(_bibcode, _apitoken, **kwargs)

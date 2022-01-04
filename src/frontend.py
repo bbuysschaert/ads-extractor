@@ -33,11 +33,12 @@ def main():
             assert os.path.exists(_outputpath), 'Please provide a valid outputpath'
 
             # Run the application
-            app.follow_papers(_bibcode=_bibcode,
-                              _apitoken=_token, 
-                              _path=_outputpath,
-                              _levels=_levels
-            )
+            _infos = app.follow_papers(_bibcode=_bibcode,
+                                        _apitoken=_token, 
+                                        _path=_outputpath,
+                                        _levels=_levels
+                                        )
+            st.text('Retrieved info on {} papers'.format(len(_infos)))
 
 
 if __name__ == '__main__':
