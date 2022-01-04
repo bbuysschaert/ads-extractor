@@ -13,6 +13,15 @@ def write_data(_info:dict, _path='./', **kwargs):
                 )
     return
 
+def read_data(_inputfile:str, **kwargs) -> dict:
+    """
+    Read the info object of a paper form a json file at _inputfile.
+    Returns a dict with the info object
+    """
+    with open(_inputfile, 'r') as _in:
+        _info = json.load(_in)
+    return _info
+
 def write_paperinfo(_info:dict, _path='./', **kwargs):
     """
     Write the info object of a paper as a json at _path.  The filename contains the bibcode
