@@ -60,7 +60,3 @@ def write_error(_bibcode:str, _path='./', **kwargs):
                 _out,
                 indent=1
                 )
-
-
-if __name__ == '__main__':
-    # Add debugging and unit testing
