@@ -64,6 +64,7 @@ def retrieve_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
     if (H.check_if_dir_exists(_path)) & (H.check_if_file_exists(_filename)):
         # Retrieve the information from file
         _info = retrieve_paper_from_file(_bibcode, _path, **kwargs)
+        return _info
     else:
         # Retrieve the information from ADS
         try:
@@ -71,10 +72,10 @@ def retrieve_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
             
             # Write out the information to a file
             L.write_data(_info, _path=_path)
+            return _info
         except:
             L.write_error(_bibcode, _path=_path)
-
-    return _info
+            return None
 
 def follow_papers_old(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) -> list:
     """
@@ -120,42 +121,52 @@ def follow_papers_old(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwar
             
     return _infos
 
-def follow_papers(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> list:
+def follow_paper(_bibcode:str, _apitoken:str, _path='./', _nlevels=0, **kwargs) -> list:
     """
     Perform an iterative lookup and extraction starting from _bibcode.
     Will fetch a result for all citations and references and this for the specified number of _levels.
 
-    Will only look at the paper itself with _levels=0
+    Optional arguments:
+        _followcitations: follow citations as links (defaults to True)
+        _followreferences: follow references as links (defaults to True)
+        _followauthors: follow authors as links (defaults to False)
     """
     # Get the information for specified paper
     _info = retrieve_paper(_bibcode, _apitoken, _path=_path, **kwargs)
     _infos = [_info]
-
-    _temp = []
-    # Check which information to follow
-    _follow_citations = True
-    _follow_references = True
-    _follow_authors = True
-    if _follow_citations:
-        _temp += _info['citations']
-    if _follow_references:
-        _temp += _info['references']
-    if _follow_authors:
-        _authors = _info['authors']
-        for aa in _authors:
-            _temp += E.get_bibcodes_author(aa, _apitoken, **kwargs)
     
-    # Determine uniqueness
-    _temp = list(set(_temp))
-    
-    # Loop througfh the different papers
-    # Should be multithreaded through a worker pool
-    for pp in _temp:
-        print(pp)
-        _infos += retrieve_paper(pp, _apitoken, _path=_path, **kwargs)
+    # Follow the different levels of links in the paper
+    if _nlevels > 0:
         
-    # Repeat similarly as the levels in the "old" code?
-
+        # Empty lists
+        _links = [] # will contain bibcodes
+        _level = [] # will contain paper dicts
+        
+        # Check which information to follow
+        if kwargs.get('_followcitations', True):
+            _links += _info['citations']
+        if kwargs.get('_followreferences', True):
+            _links += _info['references']
+        if kwargs.get('_followauthors', False):
+            _authors = _info['authors']
+            for aa in _authors:
+                _links += E.get_bibcodes_author(aa, _apitoken, **kwargs)
+    
+        # Determine uniqueness of the links
+        _links = list(set(_links))
+    
+        # Loop through the different links
+        # TODO Should be multithreaded through a worker pool 
+        for ll in _links:
+            _level.append(follow_paper(ll, _apitoken, _path=_path, _nlevels=_nlevels-1, **kwargs))
+   
+        # Flatten the level
+        _level = [pp for ll in _level for pp in ll]
+        _infos += _level
+        
+    # Ensure no duplicate information is passed above
+    # _infos = list(set(_infos)) will not work
+    
     return _infos
 
 
@@ -166,6 +177,7 @@ if __name__ == '__main__':
     path = 'C:\\Users\\bramb\\Desktop\\ads-extractor\\bibcodes'
     token = ''
     bibcode = '2019A&A...622A..67B'
-    _infos = follow_papers(bibcode, token, path, reloadfiles=True)
+    info = follow_paper(bibcode, token, path, _nlevels=2)
+    print(len(info))
 
 

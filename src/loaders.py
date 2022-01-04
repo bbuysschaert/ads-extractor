@@ -57,7 +57,7 @@ def write_error(_bibcode:str, _path='./', **kwargs):
     """
     _filename = _bibcode + '_error.json'
     _info = {'bibcode':_bibcode}
-    with open(os.path.join(_path, 'logs', _filename), 'w') as _out:
+    with open(os.path.join(_path, _filename), 'w') as _out:
         json.dump(_info,
                 _out,
                 indent=1

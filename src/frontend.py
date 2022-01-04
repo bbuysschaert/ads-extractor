@@ -33,7 +33,7 @@ def main():
             assert os.path.exists(_outputpath), 'Please provide a valid outputpath'
 
             # Run the application
-            _infos = app.follow_papers(_bibcode=_bibcode,
+            _infos = app.follow_paper(_bibcode=_bibcode,
                                         _apitoken=_token, 
                                         _path=_outputpath,
                                         _levels=_levels
