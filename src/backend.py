@@ -77,6 +77,7 @@ def retrieve_paper(_bibcode:str, _apitoken:str, _path='./', **kwargs) -> dict:
         except:
             L.write_error(_bibcode, _path=_path)
             return None
+    return
 
 def follow_papers_old(_bibcode:str, _apitoken:str, _path='./', _levels=0, **kwargs) -> list:
     """
@@ -137,7 +138,7 @@ def follow_paper(_bibcode:str, _apitoken:str, _path='./', _nlevels=0, **kwargs) 
     _infos = [_info]
     
     # Follow the different levels of links in the paper
-    if _nlevels > 0:
+    if (_nlevels > 0) & (_info != None):
         
         # Empty lists
         _links = [] # will contain bibcodes
@@ -168,7 +169,7 @@ def follow_paper(_bibcode:str, _apitoken:str, _path='./', _nlevels=0, **kwargs) 
     # Ensure no duplicate information is passed above
     # Note that dicts are not hashable, but tuples are!
     # https://stackoverflow.com/questions/9427163/remove-duplicate-dict-in-list-in-python
-    _infos = [dict(tt) for tt in {tuple(DefaultDict.items()) for dd in _infos}]
+    #_infos = [dict(tt) for tt in {tuple(DefaultDict.items()) for dd in _infos}]
     
     return _infos
 
@@ -178,7 +179,7 @@ def follow_paper(_bibcode:str, _apitoken:str, _path='./', _nlevels=0, **kwargs) 
 
 if __name__ == '__main__':
     path = 'C:\\Users\\bramb\\Desktop\\ads-extractor\\bibcodes'
-    token = ''
+    token = 'CWTmGAFBBlyFRfZTfFv527gmWfn8WTVZtZ7E7T1N'
     bibcode = '2019A&A...622A..67B'
     info = follow_paper(bibcode, token, path, _nlevels=2)
     print(len(info))
